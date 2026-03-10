@@ -5,43 +5,49 @@ const sections = [
   {
     title: "Stance & Motion",
     videos: [
-      { id: "dQw4w9WgXcQ", title: "Wrestling Stance Fundamentals" },
-      { id: "dQw4w9WgXcQ", title: "Movement Drills" },
+      { id: "Lpya9XbqimY", title: "Wrestling Stance Fundamentals — Kolat" },
+      { id: "eY3NEEqQRrk", title: "How to Drill Properly" },
     ],
   },
   {
     title: "Shots",
     videos: [
-      { id: "dQw4w9WgXcQ", title: "Single Leg Setup" },
-      { id: "dQw4w9WgXcQ", title: "Double Leg Finish" },
+      { id: "1Q2bpt9CqZs", title: "Low Single Leg — John Smith" },
+      { id: "wxNAEByjOoA", title: "Double Leg Takedown Basics" },
+      { id: "_tVPUdhD6Bs", title: "Perfect Double Leg for Beginners" },
+      { id: "vFvl1tdr8l4", title: "Double Leg Head Drive — Kolat" },
     ],
   },
   {
     title: "Defense",
     videos: [
-      { id: "dQw4w9WgXcQ", title: "Sprawl Technique" },
-      { id: "dQw4w9WgXcQ", title: "Whizzer Defense" },
+      { id: "QT7dxLzt2JA", title: "Wrestling Sprawl Secrets — John Smith" },
+      { id: "J0kcsLXX1Ms", title: "Wrestling Sprawl — Ben Askren" },
+      { id: "Qolz2PsNXnk", title: "Clearing a Front Headlock — Kolat" },
+      { id: "QN4n3NGYYr8", title: "Defending the Single Leg" },
     ],
   },
   {
     title: "Top Control",
     videos: [
-      { id: "dQw4w9WgXcQ", title: "Riding Basics" },
-      { id: "dQw4w9WgXcQ", title: "Breakdown Series" },
+      { id: "hGgx6C-UmWM", title: "Sag Headlock from 2 on 1 — Kolat" },
+      { id: "ZmmBZXR5zWk", title: "Underhook to Throw — Isaiah Martinez" },
     ],
   },
   {
     title: "Bottom Escapes",
     videos: [
-      { id: "dQw4w9WgXcQ", title: "Stand Up" },
-      { id: "dQw4w9WgXcQ", title: "Switch and Roll" },
+      { id: "ZOu_OjRY0dU", title: "Standup Drill — Kolat" },
+      { id: "nNKA8x1JU80", title: "Stand-up with Resistance — Kolat" },
+      { id: "E0NWKEcBlKo", title: "Improve Your Bottom Escapes" },
     ],
   },
   {
     title: "Conditioning Drills",
     videos: [
-      { id: "dQw4w9WgXcQ", title: "Mat Conditioning Circuit" },
-      { id: "dQw4w9WgXcQ", title: "Live Wrestling Drills" },
+      { id: "H00qa98NO_c", title: "10 Min Conditioning Circuit" },
+      { id: "D9lVO3byWAw", title: "Wrestling Conditioning Circuit" },
+      { id: "1w0wPvOYdIM", title: "45 Min At-Home Wrestling Practice" },
     ],
   },
 ];

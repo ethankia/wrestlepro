@@ -5,31 +5,34 @@ const categories = [
   {
     title: "College Duals",
     videos: [
-      { id: "dQw4w9WgXcQ", title: "Penn State vs Iowa" },
-      { id: "dQw4w9WgXcQ", title: "Ohio State vs Michigan" },
-      { id: "dQw4w9WgXcQ", title: "Oklahoma State vs NC State" },
+      { id: "4dh-RpMkJKs", title: "Penn State at Iowa — Big Ten 2024" },
+      { id: "SRiVdwGWLFg", title: "Iowa at Penn State — Big Ten 2025" },
+      { id: "CC5rNJkcxII", title: "Greco-Roman Throws Breakdown" },
     ],
   },
   {
     title: "High School Matches",
     videos: [
-      { id: "dQw4w9WgXcQ", title: "State Finals Highlights" },
-      { id: "dQw4w9WgXcQ", title: "Regional Championship" },
-      { id: "dQw4w9WgXcQ", title: "Rivalry Dual" },
+      { id: "pzuGGfMqfTk", title: "PIAA AAA State Finals 2024" },
+      { id: "N5io9b42V0U", title: "Indiana State Finals 2024" },
+      { id: "OnYTdM9ihOc", title: "Minnesota State Tournament 2024" },
+      { id: "p8ZjsD_wEBo", title: "Iowa 1A State Finals 2024" },
     ],
   },
   {
     title: "Big Match Highlights",
     videos: [
-      { id: "dQw4w9WgXcQ", title: "NCAA Finals Best Moments" },
-      { id: "dQw4w9WgXcQ", title: "Olympic Trials Highlights" },
+      { id: "S-v708Ia13A", title: "NCAA Wrestling Highlights" },
+      { id: "mgYPM-L0E0Y", title: "Greco-Roman Takedown — The Crunch" },
     ],
   },
   {
     title: "Technique Breakdowns",
     videos: [
-      { id: "dQw4w9WgXcQ", title: "Inside Trip Analysis" },
-      { id: "dQw4w9WgXcQ", title: "Cradle Series Breakdown" },
+      { id: "kA47rSI3JEE", title: "Double Leg Sprawl Counter" },
+      { id: "jijV1usVqBU", title: "How to Sprawl — Stop the Takedown" },
+      { id: "PjELWqP1eHc", title: "Sprawling as Takedown Defense" },
+      { id: "jl-acap67SE", title: "How to Front Suplex" },
     ],
   },
 ];

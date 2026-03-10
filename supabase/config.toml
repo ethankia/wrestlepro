@@ -1,0 +1,4 @@
+project_id = "rkomseebytxiaamcjarl"
+
+[functions.scan-food]
+verify_jwt = false

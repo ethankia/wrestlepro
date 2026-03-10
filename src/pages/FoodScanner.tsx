@@ -1,5 +1,7 @@
 import { useState, useRef } from "react";
-import { Camera, Upload } from "lucide-react";
+import { Camera, Upload, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import AnimatedSection from "@/components/AnimatedSection";
 import ReviewsSection from "@/components/ReviewsSection";
 
@@ -10,32 +12,8 @@ interface NutritionResult {
   carbs: number;
   fat: number;
   fiber: number;
+  items?: string[];
 }
-
-// Simple client-side food estimation based on common foods
-const foodDatabase: Record<string, NutritionResult> = {
-  chicken: { food: "Grilled Chicken Breast", calories: 284, protein: 53, carbs: 0, fat: 6, fiber: 0 },
-  rice: { food: "White Rice (1 cup)", calories: 206, protein: 4, carbs: 45, fat: 0.4, fiber: 1 },
-  broccoli: { food: "Broccoli (1 cup)", calories: 55, protein: 4, carbs: 11, fat: 0.6, fiber: 5 },
-  egg: { food: "Eggs (2 large)", calories: 143, protein: 13, carbs: 1, fat: 10, fiber: 0 },
-  banana: { food: "Banana", calories: 105, protein: 1, carbs: 27, fat: 0.4, fiber: 3 },
-  steak: { food: "Steak (6 oz)", calories: 414, protein: 46, carbs: 0, fat: 24, fiber: 0 },
-  pasta: { food: "Pasta (1 cup)", calories: 220, protein: 8, carbs: 43, fat: 1.3, fiber: 3 },
-  salad: { food: "Mixed Salad", calories: 120, protein: 3, carbs: 12, fat: 7, fiber: 4 },
-  sandwich: { food: "Turkey Sandwich", calories: 350, protein: 24, carbs: 36, fat: 12, fiber: 3 },
-  oatmeal: { food: "Oatmeal (1 cup)", calories: 154, protein: 5, carbs: 27, fat: 3, fiber: 4 },
-  protein: { food: "Protein Shake", calories: 200, protein: 30, carbs: 8, fat: 3, fiber: 1 },
-  apple: { food: "Apple", calories: 95, protein: 0.5, carbs: 25, fat: 0.3, fiber: 4 },
-};
-
-const defaultResult: NutritionResult = {
-  food: "Estimated Meal",
-  calories: 450,
-  protein: 28,
-  carbs: 42,
-  fat: 16,
-  fiber: 5,
-};
 
 const FoodScanner = () => {
   const [result, setResult] = useState<NutritionResult | null>(null);
@@ -44,61 +22,82 @@ const FoodScanner = () => {
   const [manualInput, setManualInput] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const analyzeWithAI = async (imageBase64?: string, foodText?: string) => {
+    setAnalyzing(true);
+    setResult(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("scan-food", {
+        body: { imageBase64, foodText },
+      });
+
+      if (error) {
+        throw new Error(error.message || "Failed to analyze food");
+      }
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      setResult(data);
+    } catch (err: any) {
+      console.error("Food scan error:", err);
+      toast.error(err.message || "Failed to analyze food. Try again.");
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const url = URL.createObjectURL(file);
     setImageUrl(url);
-    setAnalyzing(true);
-    setResult(null);
 
-    // Simulate analysis
-    setTimeout(() => {
-      setAnalyzing(false);
-      setResult(defaultResult);
-    }, 1500);
+    // Convert to base64
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64 = reader.result as string;
+      analyzeWithAI(base64);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleManualSearch = () => {
     if (!manualInput.trim()) return;
-    setAnalyzing(true);
-    setResult(null);
     setImageUrl(null);
-
-    setTimeout(() => {
-      const key = manualInput.toLowerCase().trim();
-      const match = Object.entries(foodDatabase).find(([k]) => key.includes(k));
-      setResult(match ? match[1] : defaultResult);
-      setAnalyzing(false);
-    }, 800);
+    analyzeWithAI(undefined, manualInput.trim());
   };
 
   return (
     <div className="page-container">
       <AnimatedSection>
         <h1 className="section-title mb-2">Food Scanner</h1>
-        <p className="text-muted-foreground mb-8">Know your fuel. Make weight smart.</p>
+        <p className="text-muted-foreground mb-2">Know your fuel. Make weight smart.</p>
+        <p className="text-xs text-muted-foreground mb-8">Powered by AI — upload a photo or type a food name.</p>
       </AnimatedSection>
 
       <AnimatedSection delay={0.1} className="max-w-xl">
         {/* Upload area */}
         <div
-          onClick={() => fileRef.current?.click()}
-          className="nav-card flex flex-col items-center justify-center py-16 cursor-pointer group"
+          onClick={() => !analyzing && fileRef.current?.click()}
+          className={`nav-card flex flex-col items-center justify-center py-12 md:py-16 cursor-pointer group ${analyzing ? "opacity-60 cursor-wait" : ""}`}
         >
           {imageUrl ? (
-            <img src={imageUrl} alt="Food" className="max-h-48 object-contain mb-4" />
+            <img src={imageUrl} alt="Food" className="max-h-48 object-contain mb-4 rounded" />
           ) : (
             <>
               <Camera className="w-12 h-12 text-muted-foreground group-hover:text-gold transition-colors mb-3" />
               <p className="text-muted-foreground text-sm">Upload a photo of your food</p>
+              <p className="text-muted-foreground text-xs mt-1">JPG, PNG — tap or click</p>
             </>
           )}
           <input
             ref={fileRef}
             type="file"
             accept="image/*"
+            capture="environment"
             className="hidden"
             onChange={handleImageUpload}
           />
@@ -112,28 +111,36 @@ const FoodScanner = () => {
             value={manualInput}
             onChange={(e) => setManualInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleManualSearch()}
-            className="flex-1 bg-card border border-border px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-gold"
+            disabled={analyzing}
+            className="flex-1 bg-card border border-border px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-gold disabled:opacity-50"
           />
           <button
             onClick={handleManualSearch}
-            className="px-6 py-3 bg-primary text-primary-foreground font-heading uppercase text-sm border border-gold hover:bg-gold/90 transition-colors"
+            disabled={analyzing || !manualInput.trim()}
+            className="px-6 py-3 bg-primary text-primary-foreground font-heading uppercase text-sm border border-gold hover:bg-gold/90 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            <Upload className="w-4 h-4" />
+            {analyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
           </button>
         </div>
 
         {/* Loading */}
         {analyzing && (
-          <div className="mt-8 text-center text-muted-foreground text-sm">
-            Analyzing your food...
+          <div className="mt-8 text-center">
+            <Loader2 className="w-6 h-6 animate-spin gold-text mx-auto mb-2" />
+            <p className="text-muted-foreground text-sm">Analyzing your food with AI...</p>
           </div>
         )}
 
         {/* Results */}
         {result && !analyzing && (
           <AnimatedSection className="mt-8">
-            <h3 className="font-heading text-xl uppercase gold-text mb-4">{result.food}</h3>
-            <div className="grid grid-cols-2 gap-3">
+            <h3 className="font-heading text-xl uppercase gold-text mb-2">{result.food}</h3>
+            {result.items && result.items.length > 1 && (
+              <p className="text-xs text-muted-foreground mb-4">
+                Detected: {result.items.join(", ")}
+              </p>
+            )}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {[
                 { label: "Calories", value: result.calories, unit: "kcal" },
                 { label: "Protein", value: result.protein, unit: "g" },
