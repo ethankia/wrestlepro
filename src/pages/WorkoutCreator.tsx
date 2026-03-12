@@ -1,5 +1,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
+import { Check } from "lucide-react";
 import AnimatedSection from "@/components/AnimatedSection";
 import ReviewsSection from "@/components/ReviewsSection";
 
@@ -120,19 +124,37 @@ const workoutDatabase: Record<string, Record<string, string[]>> = {
 };
 
 const WorkoutCreator = () => {
+  const { user } = useAuth();
   const [level, setLevel] = useState("");
   const [focus, setFocus] = useState("");
   const [workout, setWorkout] = useState<string[]>([]);
   const [generating, setGenerating] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const handleGenerate = () => {
     if (!level || !focus) return;
     setWorkout([]);
     setGenerating(true);
+    setSaved(false);
 
-    setTimeout(() => {
+    setTimeout(async () => {
+      const w = workoutDatabase[level]?.[focus] || ["No workout found."];
       setGenerating(false);
-      setWorkout(workoutDatabase[level]?.[focus] || ["No workout found."]);
+      setWorkout(w);
+
+      // Auto-save if logged in
+      if (user) {
+        const { error } = await supabase.from("saved_workouts").insert({
+          user_id: user.id,
+          level,
+          focus,
+          workout_data: w,
+        });
+        if (!error) {
+          setSaved(true);
+          toast.success("Workout saved!");
+        }
+      }
     }, 600);
   };
 
@@ -140,13 +162,16 @@ const WorkoutCreator = () => {
     <div className="page-container">
       <AnimatedSection>
         <h1 className="section-title mb-2">Workout Creator</h1>
-        <p className="text-muted-foreground mb-8">Build your session. Get after it.</p>
+        <p className="text-muted-foreground mb-8">
+          Build your session. Get after it.
+          {user && <span className="gold-text ml-1">• Auto-saving</span>}
+        </p>
       </AnimatedSection>
 
       <AnimatedSection delay={0.1} className="max-w-2xl">
         <div className="mb-6">
           <p className="text-sm text-muted-foreground mb-2 uppercase font-heading tracking-wide">Level</p>
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-wrap">
             {levels.map((l) => (
               <button
                 key={l}
@@ -205,14 +230,13 @@ const WorkoutCreator = () => {
 
         <AnimatePresence>
           {workout.length > 0 && !generating && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="mt-8"
-            >
-              <h3 className="font-heading text-xl uppercase text-foreground mb-4">
-                {level} — {focus}
-              </h3>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-8">
+              <div className="flex items-center gap-2 mb-4">
+                <h3 className="font-heading text-xl uppercase text-foreground">
+                  {level} — {focus}
+                </h3>
+                {saved && <Check className="w-4 h-4 text-green-500" />}
+              </div>
               <div className="space-y-0">
                 {workout.map((item, i) => (
                   <motion.div
