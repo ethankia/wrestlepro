@@ -11,8 +11,12 @@ import {
   Lightbulb,
   Menu,
   X,
+  Users,
+  LogIn,
+  LogOut,
 } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import wrestleProIcon from "@/assets/wrestlepro-icon.png";
 
 const navItems = [
@@ -21,6 +25,7 @@ const navItems = [
   { path: "/workout-creator", label: "Workouts", icon: Dumbbell },
   { path: "/food-scanner", label: "Food Scanner", icon: Camera },
   { path: "/dual-videos", label: "Videos", icon: Play },
+  { path: "/community", label: "Community", icon: Users },
   { path: "/daily-tip", label: "Daily Tip", icon: Lightbulb },
   { path: "/associations", label: "Associations", icon: Trophy },
   { path: "/contact", label: "Contact", icon: Phone },
@@ -29,6 +34,7 @@ const navItems = [
 const Layout = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, signOut } = useAuth();
   const isDailyTip = location.pathname === "/daily-tip";
 
   if (isDailyTip) {
@@ -63,7 +69,27 @@ const Layout = ({ children }: { children: ReactNode }) => {
             );
           })}
         </nav>
-        <div className="p-6 border-t border-border">
+        <div className="p-4 border-t border-border">
+          {user ? (
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+              <button
+                onClick={signOut}
+                className="flex items-center gap-2 text-xs text-muted-foreground hover:text-mat-red transition-colors"
+              >
+                <LogOut className="w-4 h-4" /> Sign Out
+              </button>
+            </div>
+          ) : (
+            <Link
+              to="/auth"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-gold transition-colors"
+            >
+              <LogIn className="w-4 h-4" /> Sign In
+            </Link>
+          )}
+        </div>
+        <div className="p-4 border-t border-border">
           <p className="text-xs text-muted-foreground font-body">
             "I can do all things through Christ who strengthens me." — Philippians 4:13
           </p>
@@ -76,9 +102,20 @@ const Layout = ({ children }: { children: ReactNode }) => {
           <img src={wrestleProIcon} alt="WrestlePro AI" className="w-8 h-8" />
           <span className="font-heading text-lg uppercase gold-text">WrestlePro AI</span>
         </Link>
-        <button onClick={() => setMobileOpen(!mobileOpen)} className="text-foreground p-2">
-          {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
+        <div className="flex items-center gap-3">
+          {user ? (
+            <button onClick={signOut} className="text-muted-foreground">
+              <LogOut className="w-5 h-5" />
+            </button>
+          ) : (
+            <Link to="/auth" className="text-muted-foreground">
+              <LogIn className="w-5 h-5" />
+            </Link>
+          )}
+          <button onClick={() => setMobileOpen(!mobileOpen)} className="text-foreground p-2">
+            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile menu overlay */}

@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
-import { Camera, Upload, Loader2 } from "lucide-react";
+import { Camera, Upload, Loader2, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import AnimatedSection from "@/components/AnimatedSection";
 import ReviewsSection from "@/components/ReviewsSection";
@@ -16,30 +17,47 @@ interface NutritionResult {
 }
 
 const FoodScanner = () => {
+  const { user } = useAuth();
   const [result, setResult] = useState<NutritionResult | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [manualInput, setManualInput] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const saveNutritionLog = async (data: NutritionResult) => {
+    if (!user) return;
+    const { error } = await supabase.from("nutrition_logs").insert({
+      user_id: user.id,
+      food: data.food,
+      calories: data.calories,
+      protein: data.protein,
+      carbs: data.carbs,
+      fat: data.fat,
+      fiber: data.fiber,
+    });
+    if (!error) {
+      setSaved(true);
+      toast.success("Saved to your nutrition log!");
+    }
+  };
 
   const analyzeWithAI = async (imageBase64?: string, foodText?: string) => {
     setAnalyzing(true);
     setResult(null);
+    setSaved(false);
 
     try {
       const { data, error } = await supabase.functions.invoke("scan-food", {
         body: { imageBase64, foodText },
       });
 
-      if (error) {
-        throw new Error(error.message || "Failed to analyze food");
-      }
-
-      if (data.error) {
-        throw new Error(data.error);
-      }
+      if (error) throw new Error(error.message || "Failed to analyze food");
+      if (data.error) throw new Error(data.error);
 
       setResult(data);
+      // Auto-save if logged in
+      if (user) saveNutritionLog(data);
     } catch (err: any) {
       console.error("Food scan error:", err);
       toast.error(err.message || "Failed to analyze food. Try again.");
@@ -51,11 +69,8 @@ const FoodScanner = () => {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     const url = URL.createObjectURL(file);
     setImageUrl(url);
-
-    // Convert to base64
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64 = reader.result as string;
@@ -75,11 +90,13 @@ const FoodScanner = () => {
       <AnimatedSection>
         <h1 className="section-title mb-2">Food Scanner</h1>
         <p className="text-muted-foreground mb-2">Know your fuel. Make weight smart.</p>
-        <p className="text-xs text-muted-foreground mb-8">Powered by AI — upload a photo or type a food name.</p>
+        <p className="text-xs text-muted-foreground mb-8">
+          Powered by AI — upload a photo or type a food name.
+          {user && <span className="gold-text ml-1">• Auto-saving to your log</span>}
+        </p>
       </AnimatedSection>
 
       <AnimatedSection delay={0.1} className="max-w-xl">
-        {/* Upload area */}
         <div
           onClick={() => !analyzing && fileRef.current?.click()}
           className={`nav-card flex flex-col items-center justify-center py-12 md:py-16 cursor-pointer group ${analyzing ? "opacity-60 cursor-wait" : ""}`}
@@ -103,7 +120,6 @@ const FoodScanner = () => {
           />
         </div>
 
-        {/* Manual input */}
         <div className="mt-6 flex gap-3">
           <input
             type="text"
@@ -123,7 +139,6 @@ const FoodScanner = () => {
           </button>
         </div>
 
-        {/* Loading */}
         {analyzing && (
           <div className="mt-8 text-center">
             <Loader2 className="w-6 h-6 animate-spin gold-text mx-auto mb-2" />
@@ -131,10 +146,12 @@ const FoodScanner = () => {
           </div>
         )}
 
-        {/* Results */}
         {result && !analyzing && (
           <AnimatedSection className="mt-8">
-            <h3 className="font-heading text-xl uppercase gold-text mb-2">{result.food}</h3>
+            <div className="flex items-center gap-2 mb-2">
+              <h3 className="font-heading text-xl uppercase gold-text">{result.food}</h3>
+              {saved && <Check className="w-4 h-4 text-green-500" />}
+            </div>
             {result.items && result.items.length > 1 && (
               <p className="text-xs text-muted-foreground mb-4">
                 Detected: {result.items.join(", ")}
