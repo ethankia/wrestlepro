@@ -14,7 +14,187 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      nutrition_logs: {
+        Row: {
+          calories: number
+          carbs: number
+          created_at: string
+          fat: number
+          fiber: number
+          food: string
+          id: string
+          image_url: string | null
+          protein: number
+          user_id: string
+        }
+        Insert: {
+          calories?: number
+          carbs?: number
+          created_at?: string
+          fat?: number
+          fiber?: number
+          food: string
+          id?: string
+          image_url?: string | null
+          protein?: number
+          user_id: string
+        }
+        Update: {
+          calories?: number
+          carbs?: number
+          created_at?: string
+          fat?: number
+          fiber?: number
+          food?: string
+          id?: string
+          image_url?: string | null
+          protein?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      post_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_likes: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          caption: string
+          created_at: string
+          hashtags: string[] | null
+          id: string
+          media_type: string | null
+          media_url: string | null
+          user_id: string
+        }
+        Insert: {
+          caption?: string
+          created_at?: string
+          hashtags?: string[] | null
+          id?: string
+          media_type?: string | null
+          media_url?: string | null
+          user_id: string
+        }
+        Update: {
+          caption?: string
+          created_at?: string
+          hashtags?: string[] | null
+          id?: string
+          media_type?: string | null
+          media_url?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          id: string
+          user_id: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          user_id: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          user_id?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      saved_workouts: {
+        Row: {
+          created_at: string
+          focus: string
+          id: string
+          level: string
+          user_id: string
+          workout_data: Json
+        }
+        Insert: {
+          created_at?: string
+          focus: string
+          id?: string
+          level: string
+          user_id: string
+          workout_data: Json
+        }
+        Update: {
+          created_at?: string
+          focus?: string
+          id?: string
+          level?: string
+          user_id?: string
+          workout_data?: Json
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
